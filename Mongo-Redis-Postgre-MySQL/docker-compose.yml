@@ -1,0 +1,86 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hasaki_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hasaki_db
+      MYSQL_USER: hasaki
+      MYSQL_PASSWORD: hasaki
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  scraper:
+    build: .
+    container_name: hasaki_scraper
+    depends_on:
+      - mongodb
+      - redis
+      - postgres
+      - mysql
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=hasaki_db
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=hasaki_db
+      - MYSQL_USER=hasaki
+      - MYSQL_PASSWORD=hasaki
+    networks:
+      - app_network
+
+volumes:
+  mongodb_data:
+  redis_data:
+  postgres_data:
+  mysql_data:
+
+networks:
+  app_network:
+    driver: bridge

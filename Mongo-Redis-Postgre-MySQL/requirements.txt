@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+numpy
+pymongo
+redis
+psycopg2-binary
+mysql-connector-python
